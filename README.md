@@ -176,5 +176,3 @@ This adapter-driven framework gives you:
 - **Clean Page-Object layers** for maintainability  
 - **Jest** for consistency, powerful assertions & reporting  
 - **Easy switching** between Playwright, Puppeteer, WebdriverIO  
-
-Feel free to extend with screenshot-on-fail, CI/CD hooks (GitLab/Jenkins), or add Cypress support. Happy testing! 🚀
