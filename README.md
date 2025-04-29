@@ -1,159 +1,180 @@
-A TypeScript-based end-to-end testing framework with interchangeable adapters (Playwright, Puppeteer, Cypress, WebdriverIO).
+# XYZ Bank E2E Automation Framework
 
-1) Pre-requisites
+## 1. Introduction
 
-Before you begin, ensure you have the following installed on your system:
+This repository contains an **adapter-driven end-to-end (E2E) testing framework** for the XYZ Bank demo app.  
+You write your tests once, and run them against **Playwright**, **Puppeteer**, or **WebdriverIO**—no rewriting required!
 
-Node.js (v16 or higher) and npm
+Under the hood we use a small core of actions (`open`, `click`, `type`, etc.) wired to whichever engine you choose via the `TEST_ENGINE` environment variable. On top of that sit Page-Object classes for all your flows (Home, Manager, Customer, Deposit, etc.), and a suite of Jest specs covering all the JIRA stories:
 
-Git (for version control)
+- **JIRA-1**: Create Customer  
+- **JIRA-2**: Open Account  
+- **JIRA-3**: Deposit Funds  
 
-Browsers:
+---
 
-Chromium/Chrome (used by Playwright, Puppeteer, WebdriverIO)
+## 2. Prerequisites
 
-Firefox (optional, for Playwright)
+- **Node.js** v16+  
+- **npm** v8+ (or Yarn)  
+- A valid **Internet connection** (to load the public demo app)  
+- Create a `.env` file at the project root containing:
+  ```ini
+  BASE_URL=https://www.globalsqa.com/angularJs-protractor/BankingProject
+  ```
 
-WebDriver (if using WebdriverIO without built-in service)
+---
 
-Optional:
+## 3. Getting Started
 
-Docker (if you prefer containerized browser instances)
+1. **Clone** this repo:
+   ```bash
+   git clone https://github.com/YourOrg/xyz-ui-framework-typescript.git
+   cd xyz-ui-framework-typescript
+   ```
+2. **Install** dependencies:
+   ```bash
+   npm install
+   ```
+3. **Create** your `.env` (see Prerequisites above).
 
-2) Getting Started
+---
 
-Clone the repository
+## 4. How to Run the JIRA Tests in Order
 
-git clone <your-repo-url>
-cd browser-adapter-ui-automation-framework
+Our specs live under `tests/jira-1`, `tests/jira-2`, `tests/jira-3`. To execute them **in order**, serially:
 
-Install dependencies
+```bash
+npm run test:jiras
+```
 
-npm install
+This script runs:
+```jsonc
+"test:jiras": "jest --runInBand --testPathPattern="tests/jira-(1|2|3)""
+```
+so JIRA-1 runs before JIRA-2, then JIRA-3.
 
-Configure environment
+---
 
-Copy .env.example to .env:
+## 5. How to View the Test Report
 
-cp .env.example .env
+### 5.1 Console Output
 
-Edit .env to set your application’s base URL and flags:
+```bash
+npm run test:jiras
+```
 
-BASE_URL=http://localhost:3000
-TEST_ENGINE=playwright   # playwright | puppeteer | cypress | webdriverio
-HEADLESS=true            # true | false
-SLOWMO=0                 # ms slowdown for visual debugging
-SCREENSHOTS_DIR=screenshots
+### 5.2 HTML Test Report
 
-Build (TypeScript compile)
+![alt text](image.png)
 
-npm run build
+1. Install the HTML reporter (once):
+   ```bash
+   npm install --save-dev jest-html-reporters
+   ```
+2. Ensure your **`jest.config.js`** includes:
+   ```js
+   reporters: [
+     'default',
+     ['jest-html-reporters', {
+       publicPath: './html-report',
+       filename: 'report.html',
+       expand: true
+     }]
+   ]
+   ```
+3. Run the JIRAs:
+   ```bash
+   npm run test:jiras
+   ```
+4. Open the report:
+   - macOS: `open html-report/report.html`  
+   - Linux:  `xdg-open html-report/report.html`  
+   - Windows: `start html-report\report.html`  
 
-3) How to Run Tests
 
-You can run tests against any supported adapter by using the npm scripts:
 
-Playwright
+Then open:
+```bash
+open coverage/lcov-report/index.html
+```
 
+---
+
+## 6. Change & Run Different Frameworks
+
+By default `npm test` uses whatever `TEST_ENGINE` you set:
+
+```bash
 npm run test:playwright
-
-Puppeteer
-
 npm run test:puppeteer
-
-Cypress
-
-npm run test:cypress
-
-WebdriverIO
-
 npm run test:webdriverio
+```
 
-Or run all tests (default engine from .env):
+These scripts set `TEST_ENGINE` for you. Under the hood, our factory spins up the right adapter.
 
-npm test
+---
 
-4) Explanation of Each Test
+## 7. Change Browser
 
-tests/login.spec.ts (Google Load)
+In your adapter (e.g. `src/adapters/playwright.ts`):
 
-Purpose: Verifies that a browser session can navigate to an external URL.
+```ts
+chromium.launch({
+  headless: false,    // or true
+  slowMo:   100       // slow down each action
+});
+```
 
-Flow:
+For Puppeteer and WebdriverIO, similar options exist in their launch/config files.
 
-launch(): Starts the configured adapter.
+---
 
-open('https://www.google.com'): Navigates to Google.
+## 8. Headless Mode
 
-getText('title'): Retrieves the page title.
+To run headless, edit the adapter’s launch:
 
-Assertion: Confirms the title contains “google”.
+```ts
+const headless = process.env.HEADLESS !== 'false';
+await chromium.launch({ headless });
+```
 
-tests/shopping-cart.spec.ts
+Then:
+```bash
+cross-env TEST_ENGINE=playwright HEADLESS=true npm test
+```
 
-Purpose: Simulates adding an item to a shopping cart on your application.
+---
 
-Flow:
+## 9. Test Scenarios Covered
 
-Navigate to /products (via open('/products')).
+1. **JIRA-1**  
+   - Empty fields → HTML5 tooltip  
+   - Successful customer creation alert + table entry  
+   - Duplicate-customer warning  
 
-Click the first “Add to Cart” button.
+2. **JIRA-2**  
+   - Open a new account → success alert + table update  
 
-Navigate to /cart.
+3. **JIRA-3**  
+   - Empty deposit → HTML5 validation  
+   - Deposit success → banner + balance update + transaction row  
 
-Retrieve .cart-count text and assert it equals 1.
+4. **Smoke Tests**  
+   - Home → Customer Login → dashboard  
+   - Manager Login → Add Customer → Open Account  
 
-tests/google-search.spec.ts
+5. **End-to-End Flows** across manager & customer roles.
 
-Purpose: Performs a search on Google and validates search functionality.
+---
 
-Flow:
+## 10. Final Thoughts
 
-Navigate to Google.
+This adapter-driven framework gives you:
 
-(Optional) Click the cookie-consent button.
+- **One & done** tests across multiple UI engines  
+- **Clean Page-Object layers** for maintainability  
+- **Jest** for consistency, powerful assertions & reporting  
+- **Easy switching** between Playwright, Puppeteer, WebdriverIO  
 
-Type “Playwright” into the search box.
-
-Submit the search.
-
-Verify the page title contains “Playwright”.
-
-5) Browser Adapter Concept
-
-This framework abstracts browser controls behind a BrowserAdapter interface:
-
-export interface BrowserAdapter {
-  launch(): Promise<void>;
-  close(): Promise<void>;
-  open(path: string): Promise<void>;
-  click(selector: string): Promise<void>;
-  type(selector: string, text: string): Promise<void>;
-  getText(selector: string): Promise<string>;
-  screenshot(path: string): Promise<void>;
-}
-
-Adapters: Concrete classes implement this interface for each tool:
-
-PlaywrightAdapter
-
-PuppeteerAdapter
-
-CypressAdapter
-
-WebdriverIOAdapter
-
-Factory: A simple factory reads TEST_ENGINE and returns the appropriate adapter.
-
-Actions: Core test functions (open, click, etc.) delegate to the chosen adapter at runtime. Tests remain engine-agnostic and can switch tools with a single configuration change.
-
-This design promotes:
-
-Flexibility: Swap browsers or frameworks without rewriting tests.
-
-Consistency: Single API for all E2E operations.
-
-Maintainability: Centralized code for setup, teardown, and utilities (logging, screenshots, reporting).
-
-Happy testing! 🎉
-
+Feel free to extend with screenshot-on-fail, CI/CD hooks (GitLab/Jenkins), or add Cypress support. Happy testing! 🚀

@@ -1,4 +1,3 @@
-// src/utils/logger.ts
 export function log(message: string): void {
     console.log(`[LOG] ${new Date().toISOString()} - ${message}`);
   }

@@ -1,13 +1,13 @@
-import type { Config } from 'jest';
-
-const config: Config = {
+// jest.config.js
+module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/tests/**/*.spec.ts'],
-  globals: {
-    'ts-jest': { tsconfig: './tsconfig.json' }
-  },
-  testTimeout: 30000,    // 30 s default
+  reporters: [
+    'default',
+    ['jest-html-reporters', {
+      publicPath: './html-report',
+      filename: 'report.html',
+      expand: true
+    }]
+  ]
 };
-
-export default config;

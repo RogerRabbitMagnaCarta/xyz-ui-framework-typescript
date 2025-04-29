@@ -1,5 +1,4 @@
-#!/usr/bin/env ts-node
-import 'dotenv/config';              // <-- this loads .env into process.env
+import 'dotenv/config';
 import { launch, close } from './core/actions';
 
 async function main() {

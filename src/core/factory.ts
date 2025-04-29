@@ -1,16 +1,17 @@
 // src/core/factory.ts
-import { PlaywrightAdapter } from '../adapters/playwright';
-import { PuppeteerAdapter } from '../adapters/puppeteer';
-import { CypressAdapter } from '../adapters/cypress';
+import { TEST_ENGINE } from '../../config';
 import type { BrowserAdapter } from './adapter';
+import { PlaywrightAdapter } from '../adapters/playwright';
+import { PuppeteerAdapter }  from '../adapters/puppeteer';
+import { WebdriverIOAdapter } from '../adapters/webdriverio';
 
 export function createAdapter(): BrowserAdapter {
-  const engine = (process.env.TEST_ENGINE || 'playwright').toLowerCase();
-  switch (engine) {
+  switch (TEST_ENGINE.toLowerCase()) {
     case 'puppeteer':
       return new PuppeteerAdapter();
-    case 'cypress':
-      return new CypressAdapter();
+    case 'webdriverio':
+    case 'wdio':
+      return new WebdriverIOAdapter();
     case 'playwright':
     default:
       return new PlaywrightAdapter();

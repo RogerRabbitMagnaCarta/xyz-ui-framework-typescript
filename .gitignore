@@ -1,5 +1,35 @@
+# Node dependencies
 node_modules/
-dist/
+
+# Environment files
 .env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+coverage/
+html-report/
+
+# Logs
 npm-debug.log*
-__MACOSX/
+yarn-debug.log*
+yarn-error.log*
+
+# IDE / Editor directories
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jest cache
+jest-cache/
+
+# Playwright/Webdriver snapshots, state
+test-results/
